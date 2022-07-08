@@ -36,9 +36,9 @@ dag = DAG(
 )
 
 t1 = SparkKubernetesOperator(
-    task_id='spark_pi_submit',
-    namespace="spark-apps",
-    application_file="example_spark_kubernetes_spark_pi.yaml",
+    task_id='get-strategies',
+    namespace="ns-team-ranking-gw-2022",
+    application_file="get-strategies.yaml",
     kubernetes_conn_id="kubernetes_default",
     do_xcom_push=True,
     dag=dag,
@@ -47,10 +47,22 @@ t1 = SparkKubernetesOperator(
     }
 )
 
-t2 = SparkKubernetesSensor(
-    task_id='spark_pi_monitor',
-    namespace="spark-apps",
-    application_name="{{ task_instance.xcom_pull(task_ids='spark_pi_submit')['metadata']['name'] }}",
+t2 = SparkKubernetesOperator(
+    task_id='training-record-generation',
+    namespace="ns-team-ranking-gw-2022",
+    application_file="training-record-generation.yaml",
+    kubernetes_conn_id="kubernetes_default",
+    do_xcom_push=True,
+    dag=dag,
+    params={
+        "k8s_namespace": "ns-team-ranking-gw-2022",
+    }
+)
+
+t3 = SparkKubernetesSensor(
+    task_id='janitor',
+    namespace="ns-team-ranking-gw-2022",
+    application_file="janitor.yaml",
     kubernetes_conn_id="kubernetes_default",
     dag=dag,
     params={
@@ -58,3 +70,4 @@ t2 = SparkKubernetesSensor(
     }
 )
 t1 >> t2
+t1 >> t3
