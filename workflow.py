@@ -59,7 +59,7 @@ t2 = SparkKubernetesOperator(
     }
 )
 
-t3 = SparkKubernetesSensor(
+t3 = SparkKubernetesOperator(
     task_id='janitor',
     namespace="ns-team-ranking-gw-2022",
     application_file="janitor.yaml",
